@@ -1,5 +1,4 @@
 # main.py
-
 from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect, status, Depends, HTTPException, Request, Header
 from pydantic import BaseModel
 from typing import List, Optional, Dict
@@ -7,7 +6,7 @@ import os
 from dotenv import load_dotenv
 
 # SQLAlchemy
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Date, Time
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Date, Time, inspect as sqlalchemy_inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import OperationalError, ArgumentError # Importar ambos os erros
@@ -148,11 +147,16 @@ async def on_startup():
         print("A tentar conectar ao banco de dados...")
         with engine.connect() as connection:
             print(f"{LogColors.OKGREEN}Conexão com o banco de dados estabelecida com sucesso.{LogColors.ENDC}")
-        
-        print("A verificar/criar tabelas...")
-        Base.metadata.create_all(bind=engine)
-        print(f"{LogColors.OKCYAN}Tabelas verificadas/criadas com sucesso.{LogColors.ENDC}")
-        
+            
+            # MUDANÇA: Usar o inspector para verificar a existência da tabela
+            inspector = sqlalchemy_inspect(engine)
+            if not inspector.has_table(DataDB.__tablename__):
+                print(f"Tabela '{DataDB.__tablename__}' não encontrada. A tentar criar...")
+                Base.metadata.create_all(bind=engine)
+                print(f"{LogColors.OKCYAN}Tabela '{DataDB.__tablename__}' criada com sucesso.{LogColors.ENDC}")
+            else:
+                print(f"{LogColors.OKCYAN}Tabela '{DataDB.__tablename__}' já existe. Nenhuma ação necessária.{LogColors.ENDC}")
+
         app_state.db_is_connected = True
 
     except (OperationalError, ArgumentError) as e:
