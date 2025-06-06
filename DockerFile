@@ -29,4 +29,5 @@ EXPOSE 8000
 # Substitua "main" pelo nome do seu ficheiro Python principal se for diferente.
 # Substitua "app" pelo nome da sua instância FastAPI se for diferente.
 # O host 0.0.0.0 torna a aplicação acessível de fora do contentor.
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# O Gunicorn irá gerir os processos de trabalho do Uvicorn.
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "2", "-b", "0.0.0.0:8000", "main:app"]

@@ -1,0 +1,87 @@
+# docker-compose.yml
+
+# A secção 'services' é o coração do ficheiro. Aqui, definimos cada
+# componente (contêiner) da nossa aplicação. Cada chave sob 'services'
+# (ex: 'api', 'db') torna-se o nome de um serviço.
+services:
+
+  # --- SERVIÇO 1: A NOSSA APLICAÇÃO WEB (API FastAPI) ---
+  api:
+    # 'build: .' instrui o Docker Compose a não usar uma imagem pronta, mas sim
+    # a construir uma imagem a partir de um 'Dockerfile'. O '.' significa que
+    # o Dockerfile está no mesmo diretório que este docker-compose.yml.
+    build: .
+
+    # 'ports' expõe portas do contêiner para a nossa máquina local (o host).
+    # O formato é "PORTA_HOST:PORTA_CONTÊINER".
+    # Isto significa que qualquer coisa que chegar na porta 8080 do nosso PC
+    # será redirecionada para a porta 8000 dentro do contêiner 'api'.
+    ports:
+      - "8000:8000"
+
+    # 'volumes' neste serviço é usado para desenvolvimento em tempo real (Bind Mount).
+    # O formato é "CAMINHO_NO_HOST:CAMINHO_NO_CONTÊINER".
+    # O '.' representa o diretório atual do projeto na nossa máquina.
+    # '/app' é o WORKDIR que definimos no nosso Dockerfile.
+    # Resultado: Qualquer alteração de código que guardarmos no nosso editor
+    # será refletida instantaneamente dentro do contêiner, permitindo o hot-reload do Uvicorn.
+    volumes:
+      - .:/app
+
+    # 'environment' permite-nos injetar variáveis de ambiente diretamente
+    # no contêiner. A nossa aplicação Python pode então lê-las usando os.getenv().
+    # Esta é a forma correta de gerir configurações e segredos.
+    environment:
+      # A URL de conexão que a nossa API vai usar para encontrar o banco de dados.
+      # O mais importante aqui é o host: '@db'. 'db' é o nome do nosso serviço
+      # de banco de dados abaixo. O Docker Compose cria uma rede interna e permite
+      # que os serviços se comuniquem uns com os outros usando os seus nomes de serviço
+      # como se fossem nomes de domínio.
+      - DATABASE_URL=postgresql://thalysson:bdtest@db:5432/apidblocal
+      - API_KEY=secretkey
+
+    # 'depends_on' define a ordem de arranque dos serviços.
+    # Isto diz ao Docker Compose: "Não inicie o serviço 'api' até que
+    # o serviço 'db' esteja a funcionar". Isto previne que a nossa API
+    # falhe no arranque porque o banco de dados ainda não está pronto.
+    depends_on:
+      - db
+
+  # --- SERVIÇO 2: O NOSSO BANCO DE DADOS POSTGRESQL ---
+  db:
+    # 'image' diz ao Compose para usar uma imagem pronta do Docker Hub,
+    # em vez de construir uma. 'postgres:15-alpine' é a imagem oficial
+    # do PostgreSQL na versão 15, usando o Alpine Linux como base,
+    # que é muito leve e seguro.
+    image: postgres:15-alpine
+
+    # Aqui também expomos a porta do banco de dados para a nossa máquina local.
+    # Isto é opcional, mas permite-nos conectar ao banco de dados com
+    # uma ferramenta cliente (como DBeaver, Beekeeper) a partir do nosso PC para
+    # depuração, verificação de dados, etc.
+    # Mapeamos a porta 5433 do nosso PC para a 5432 (porta padrão do Postgres) do contêiner.
+    ports:
+      - "5432:5432"
+
+    # Tal como na API, definimos variáveis de ambiente. A imagem oficial do Postgres
+    # foi desenhada para usar estas variáveis específicas para se autoconfigurar
+    # na primeira vez que é executada.
+    environment:
+      - POSTGRES_USER=thalysson      # Define o nome do superutilizador do banco.
+      - POSTGRES_PASSWORD=bdtest # Define a senha para esse utilizador.
+      - POSTGRES_DB=apidblocal            # Cria automaticamente uma base de dados com este nome.
+
+    # 'volumes' aqui é usado para PERSISTÊNCIA DE DADOS.
+    # Contêineres são efémeros. Se removermos o contêiner 'db', todos os dados dentro
+    # dele seriam perdidos. Para evitar isso, mapeamos a pasta interna onde o Postgres
+    # guarda os dados ('/var/lib/postgresql/data') para um 'volume' gerido pelo Docker.
+    # Este volume 'postgres_data' age como um disco rígido externo para o contêiner.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# A secção 'volumes' de nível superior é onde declaramos formalmente os volumes nomeados
+# que queremos que o Docker Compose crie e gira para nós.
+# Isto desacopla o ciclo de vida do volume do ciclo de vida do contêiner.
+volumes:
+  # O nome do volume que usámos acima.
+  postgres_data:
