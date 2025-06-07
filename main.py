@@ -121,8 +121,12 @@ def get_db():
     try:
         yield db
     finally:
-        if db:
-            db.close()
+        if db and app_state.db_is_connected:
+            try:
+                db.close()
+            except OperationalError:
+                pass
+
 
 # --- Router para Endpoints ---
 router = APIRouter()
@@ -148,7 +152,6 @@ async def on_startup():
         with engine.connect() as connection:
             print(f"{LogColors.OKGREEN}Conexão com o banco de dados estabelecida com sucesso.{LogColors.ENDC}")
             
-            # MUDANÇA: Usar o inspector para verificar a existência da tabela
             inspector = sqlalchemy_inspect(engine)
             if not inspector.has_table(DataDB.__tablename__):
                 print(f"Tabela '{DataDB.__tablename__}' não encontrada. A tentar criar...")
@@ -183,7 +186,7 @@ async def on_startup():
 async def submit_temperature_reading_http(
     payload: TemperatureReadingPayload, 
     request: Request,
-    db: Optional[Session] = Depends(get_db) # A sessão agora é opcional
+    db: Optional[Session] = Depends(get_db) 
 ):
     client_ip = request.client.host if request.client else "unknown_ip"
     sensor_id = payload.sensor_id
@@ -213,12 +216,17 @@ async def submit_temperature_reading_http(
 
         except Exception as e:
             if db: db.rollback()
-            app_state.db_is_connected = False
+            # MUDANÇA: Atualizamos o estado global aqui para que
+            # todas as futuras requisições (incluindo WebSockets)
+            # saibam que o banco está offline.
+            app_state.db_is_connected = False 
             print(f"{LogColors.FAIL}ERRO EM TEMPO REAL: Conexão com o banco perdida. Dados não salvos.{LogColors.ENDC}")
+            print(f"{LogColors.WARNING}Detalhe do erro: {e}{LogColors.ENDC}")
+            db_data_entry = None 
+            
     else:
         print(f"{LogColors.WARNING}AVISO: Banco de dados indisponível. Dados de {sensor_id} não serão salvos.{LogColors.ENDC}")
 
-    # A transmissão via WebSocket acontece independentemente do banco
     data_to_broadcast = TemperatureDataResponse(
         id=db_data_entry.id if db_data_entry else None,
         temperature=payload.temperature, date_recorded=date_to_store,
@@ -235,18 +243,18 @@ async def submit_temperature_reading_http(
 async def websocket_sensor_updates_endpoint(websocket: WebSocket, db: Optional[Session] = Depends(get_db)):
     await manager.connect(websocket)
     
-    # Enviar o último dado registado, se o banco estiver disponível
     if app_state.db_is_connected and db:
         try:
             last_data_entry = db.query(DataDB).order_by(DataDB.id.desc()).first()
             if last_data_entry:
                 await websocket.send_json(TemperatureDataResponse.from_orm(last_data_entry).model_dump(mode='json'))
         except Exception as e:
-            print(f"{LogColors.WARNING}WS: Erro ao buscar último dado: {e}{LogColors.ENDC}")
+            # MUDANÇA: Se a busca falhar, também atualizamos o estado.
+            app_state.db_is_connected = False
+            print(f"{LogColors.WARNING}WS: Erro ao buscar último dado, banco agora marcado como offline: {e}{LogColors.ENDC}")
 
     try:
         while True:
-            # Mantém a conexão aberta para receber broadcasts
             await websocket.receive_text()
     except WebSocketDisconnect:
         pass
