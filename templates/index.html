@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Sensor API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300,400,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-light: #f8f9fa;
+            --background-white: #ffffff;
+            --text-dark: #343a40;
+            --border-light: #e9ecef;
+            --code-bg: #e2e6ea;
+            --box-shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--background-white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px var(--box-shadow);
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 2px solid var(--border-light);
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        strong {
+            color: var(--secondary-color);
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #0056b3; /* Darker primary color on hover */
+        }
+
+        code {
+            background-color: var(--code-bg);
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-family: 'Roboto Mono', monospace; /* Monospaced font for code */
+            font-size: 0.95em;
+            color: var(--text-dark);
+            white-space: nowrap; /* Prevent code from wrapping */
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto; /* Enable horizontal scrolling for long code lines */
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            margin-top: 15px;
+            border: 1px solid var(--border-light);
+        }
+
+        pre code {
+            padding: 0;
+            background-color: transparent;
+            border-radius: 0;
+            white-space: pre; /* Ensure pre-formatted text respects spaces */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Temperature Sensor API</h1>
+        <div class="section">
+            <p>This is the homepage for your API. To interact with the endpoints, please use the following URLs:</p>
+        </div>
+        <div class="section">
+            <h2>HTTP Endpoints:</h2>
+            <p><strong>Submit Temperature Reading (POST):</strong></p>
+            <p><code>/api/temperature_reading</code></p>
+            <p>Method: <code>POST</code></p>
+            <p>Requires authentication via <code>X-API-Key</code> in the header.</p>
+            <p>Example Request Body (JSON):</p>
+            <pre><code>{
+    "temperature": 25.5,
+    "sensor_id": "sensor_001"
+}</code></pre>
+        </div>
+        <div class="section">
+            <h2>WebSocket Endpoint:</h2>
+            <p><strong>Receive Real-time Sensor Updates:</strong></p>
+            <p><code>/ws/sensor_updates</code></p>
+            <p>Protocol: <code>WebSocket</code></p>
+            <p>Connects to receive temperature updates as they are sent.</p>
+            <p>Requires authentication via <code>api-key</code> as a query parameter in the URL, for example:</p>
+            <p><code>ws://your-domain.com/ws/sensor_updates?api-key=YOUR_SECRET_KEY</code></p>
+        </div>
+        <div class="section">
+            <h2>Interactive Documentation:</h2>
+            <p>Access Swagger UI documentation at: <a href="/docs">/docs</a></p>
+            <p>Access ReDoc documentation at: <a href="/redoc">/redoc</a></p>
+        </div>
+        <p>Welcome!</p>
+    </div>
+</body>
+</html>
