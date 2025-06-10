@@ -7,3 +7,4 @@ pytz
 gunicorn
 jinja2
 python-multipart
+colorlog
