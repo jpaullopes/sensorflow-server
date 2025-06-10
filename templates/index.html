@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temperature Sensor API</title>
+    <title>Temperature Sensor Display</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300,400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #007bff;
@@ -13,146 +14,204 @@
             --background-white: #ffffff;
             --text-dark: #343a40;
             --border-light: #e9ecef;
-            --code-bg: #e2e6ea;
-            --box-shadow: rgba(0, 0, 0, 0.08);
+            --gradient-start: #00c6ff;
+            --gradient-end: #0072ff;
+            --shadow-light: rgba(0, 0, 0, 0.1);
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
-            padding: 40px 20px;
-            background-color: var(--background-light);
+            padding: 0;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
             color: var(--text-dark);
-            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden; /* Hide overflow for animations */
         }
 
         .container {
             max-width: 900px;
-            margin: 0 auto;
+            margin: 20px;
             background-color: var(--background-white);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px var(--box-shadow);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow-light);
+            text-align: center;
+            opacity: 0; /* Start hidden for animation */
+            transform: translateY(20px); /* Start slightly below for animation */
+            animation: fadeIn 1s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 1;
         }
 
-        h1, h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-weight: 700;
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         h1 {
-            font-size: 2.5em;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h2 {
-            font-size: 1.8em;
-            border-bottom: 2px solid var(--border-light);
-            padding-bottom: 10px;
-            margin-top: 30px;
-        }
-
-        .section {
-            margin-bottom: 25px;
-        }
-
-        p {
-            margin-bottom: 10px;
-            font-size: 1.05em;
-        }
-
-        strong {
-            color: var(--secondary-color);
-        }
-
-        a {
             color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            opacity: 0; /* Start hidden for animation */
+            transform: translateY(-20px); /* Start slightly above for animation */
+            animation: slideInDown 1s forwards cubic-bezier(0.17, 0.84, 0.44, 1) 0.5s;
         }
 
-        a:hover {
-            text-decoration: underline;
-            color: #0056b3; /* Darker primary color on hover */
+        @keyframes slideInDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        code {
-            background-color: var(--code-bg);
-            padding: 3px 6px;
-            border-radius: 5px;
-            font-family: 'Roboto Mono', monospace; /* Monospaced font for code */
-            font-size: 0.95em;
+        .tagline {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            margin-bottom: 40px;
+            opacity: 0; /* Start hidden for animation */
+            animation: fadeIn 1s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s;
+        }
+
+        .animation-container {
+            margin-top: 50px;
+            position: relative;
+            height: 150px; /* Adjust height for the animation */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .thermometer {
+            width: 50px;
+            height: 150px;
+            background-color: #e0e0e0;
+            border-radius: 25px 25px 5px 5px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid var(--secondary-color);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .thermometer::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: #ff4500;
+            border-radius: 50%;
+            border: 3px solid var(--secondary-color);
+            z-index: 2;
+        }
+
+        .mercury {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            background-color: #ff4500;
+            height: 0; /* Initial height for animation */
+            border-radius: 0 0 10px 10px;
+            transition: height 2s ease-out;
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .welcome-text {
+            margin-top: 40px;
+            font-size: 1.2em;
             color: var(--text-dark);
-            white-space: nowrap; /* Prevent code from wrapping */
+            opacity: 0;
+            animation: fadeIn 1s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.5s;
         }
 
-        pre {
-            background-color: var(--code-bg);
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto; /* Enable horizontal scrolling for long code lines */
-            font-family: 'Roboto Mono', monospace;
-            font-size: 0.9em;
-            margin-top: 15px;
-            border: 1px solid var(--border-light);
+        /* Background floating elements */
+        .bubble {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+            z-index: 0;
         }
 
-        pre code {
-            padding: 0;
-            background-color: transparent;
-            border-radius: 0;
-            white-space: pre; /* Ensure pre-formatted text respects spaces */
-        }
+        .bubble:nth-child(1) { width: 60px; height: 60px; top: 10%; left: 5%; animation-duration: 12s; }
+        .bubble:nth-child(2) { width: 80px; height: 80px; top: 20%; right: 10%; animation-duration: 18s; animation-delay: 1s; }
+        .bubble:nth-child(3) { width: 40px; height: 40px; bottom: 15%; left: 20%; animation-duration: 10s; animation-delay: 2s; }
+        .bubble:nth-child(4) { width: 70px; height: 70px; top: 50%; right: 5%; animation-duration: 14s; animation-delay: 0.5s; }
+        .bubble:nth-child(5) { width: 90px; height: 90px; bottom: 5%; left: 40%; animation-duration: 16s; animation-delay: 2.5s; }
+        .bubble:nth-child(6) { width: 50px; height: 50px; top: 30%; left: 30%; animation-duration: 11s; animation-delay: 1.5s; }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            body {
-                padding: 20px 15px;
-            }
-            h1 {
-                font-size: 2em;
-            }
-            h2 {
-                font-size: 1.5em;
-            }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+            50% { transform: translateY(-20px) rotate(10deg); opacity: 0.6; }
+            100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
         }
     </style>
 </head>
 <body>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+
     <div class="container">
-        <h1>Welcome to the Temperature Sensor API</h1>
-        <div class="section">
-            <p>This is the homepage for your API. To interact with the endpoints, please use the following URLs:</p>
+        <h1>Temperatura Conectada</h1>
+        <p class="tagline">Sua visão em tempo real do ambiente.</p>
+
+        <div class="animation-container">
+            <div class="thermometer">
+                <div class="mercury" id="mercury-level"></div>
+            </div>
         </div>
-        <div class="section">
-            <h2>HTTP Endpoints:</h2>
-            <p><strong>Submit Temperature Reading (POST):</strong></p>
-            <p><code>/api/temperature_reading</code></p>
-            <p>Method: <code>POST</code></p>
-            <p>Requires authentication via <code>X-API-Key</code> in the header.</p>
-            <p>Example Request Body (JSON):</p>
-            <pre><code>{
-    "temperature": 25.5,
-    "sensor_id": "sensor_001"
-}</code></pre>
-        </div>
-        <div class="section">
-            <h2>WebSocket Endpoint:</h2>
-            <p><strong>Receive Real-time Sensor Updates:</strong></p>
-            <p><code>/ws/sensor_updates</code></p>
-            <p>Protocol: <code>WebSocket</code></p>
-            <p>Connects to receive temperature updates as they are sent.</p>
-            <p>Requires authentication via <code>api-key</code> as a query parameter in the URL, for example:</p>
-            <p><code>ws://your-domain.com/ws/sensor_updates?api-key=YOUR_SECRET_KEY</code></p>
-        </div>
-        <div class="section">
-            <h2>Interactive Documentation:</h2>
-            <p>Access Swagger UI documentation at: <a href="/docs">/docs</a></p>
-            <p>Access ReDoc documentation at: <a href="/redoc">/redoc</a></p>
-        </div>
-        <p>Welcome!</p>
+
+        <p class="welcome-text">Explore o futuro da medição inteligente.</p>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mercury = document.getElementById('mercury-level');
+            const maxMercuryHeight = 110; // Max height of the mercury in px, based on thermometer height (150px - 40px bulb)
+
+            // Simulate a temperature change
+            let currentTemperature = 20; // Start at 20 degrees
+            const minTemp = 10;
+            const maxTemp = 30;
+
+            function updateMercuryLevel(temp) {
+                // Map temperature range (10-30) to mercury height (0-maxMercuryHeight)
+                const height = ((temp - minTemp) / (maxTemp - minTemp)) * maxMercuryHeight;
+                mercury.style.height = `${height}px`;
+            }
+
+            // Initial mercury level
+            updateMercuryLevel(currentTemperature);
+
+            // Animate temperature change over time
+            setInterval(() => {
+                // Simulate a random temperature fluctuation
+                currentTemperature = minTemp + Math.random() * (maxTemp - minTemp);
+                updateMercuryLevel(currentTemperature);
+            }, 3000); // Change temperature every 3 seconds
+        });
+    </script>
 </body>
 </html>
