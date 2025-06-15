@@ -15,6 +15,10 @@ services:
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      # --- CORREÇÃO APLICADA ---
+      # Monta o nosso ficheiro de configuração personalizado dentro do Nginx,
+      # aplicando-o apenas ao nosso domínio.
+      - ./discord_verification.conf:/etc/nginx/vhost.d/tempdatacenter.zapto.org:ro
     restart: always
 
   # 2. SERVIÇO DO LET'S ENCRYPT
@@ -35,9 +39,6 @@ services:
     build: .
     container_name: temp-data-api
     restart: always
-    # --- CORREÇÃO PARA .env ---
-    # A diretiva 'env_file' carrega as variáveis de um arquivo .env
-    # para dentro do ambiente do contêiner.
     env_file:
       - .env
     expose:
