@@ -6,7 +6,7 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Definir o diretório de trabalho dentro do contentor.
+# Definir o diretório de trabalho dentro do contentor.clea
 WORKDIR /app
 
 # Copiar o ficheiro de requisitos primeiro para aproveitar o cache do Docker.

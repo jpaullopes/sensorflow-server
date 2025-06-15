@@ -1,87 +1,72 @@
-# docker-compose.yml
+# Versão do Docker Compose. '3.8' é uma versão moderna e estável.
+version: '3.8'
 
-# A secção 'services' é o coração do ficheiro. Aqui, definimos cada
-# componente (contêiner) da nossa aplicação. Cada chave sob 'services'
-# (ex: 'api', 'db') torna-se o nome de um serviço.
+# --- INÍCIO DA DEFINIÇÃO DOS SERVIÇOS/CONTÊINERES ---
 services:
 
-  # --- SERVIÇO 1: A NOSSA APLICAÇÃO WEB (API FastAPI) ---
+  # 1. SERVIÇO DO NGINX REVERSE PROXY
+  # Este contêiner atua como o "porteiro" do seu servidor. Ele recebe todo o
+  # tráfego das portas 80 (HTTP) e 443 (HTTPS) e o direciona para a aplicação correta.
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Volumes compartilhados para que os contêineres possam se comunicar e
+      # compartilhar os certificados SSL e configurações.
+      - certs:/etc/nginx/certs:ro
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    restart: always
+
+  # 2. SERVIÇO DO LET'S ENCRYPT
+  # Este contêiner "ajudante" monitora os outros contêineres. Quando ele detecta
+  # um novo domínio (via variável de ambiente), ele automaticamente solicita,
+  # gera e instala um certificado SSL gratuito. Ele também cuida da renovação.
+  letsencrypt-companion:
+    image: nginxproxy/acme-companion
+    container_name: letsencrypt-companion
+    volumes:
+      # Precisa acessar os mesmos volumes do nginx-proxy para funcionar.
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: always
+
+  # 3. O SEU SERVIÇO DE API (CONSTRUÍDO DO SEU DOCKERFILE)
+  # Este é o contêiner da sua aplicação. O Docker Compose irá construí-lo
+  # automaticamente usando o Dockerfile que está na mesma pasta.
   api:
-    # 'build: .' instrui o Docker Compose a não usar uma imagem pronta, mas sim
-    # a construir uma imagem a partir de um 'Dockerfile'. O '.' significa que
-    # o Dockerfile está no mesmo diretório que este docker-compose.yml.
+    # A instrução 'build: .' diz ao Compose para usar o Dockerfile no diretório atual ('.')
     build: .
-
-    # 'ports' expõe portas do contêiner para a nossa máquina local (o host).
-    # O formato é "PORTA_HOST:PORTA_CONTÊINER".
-    # Isto significa que qualquer coisa que chegar na porta 8080 do nosso PC
-    # será redirecionada para a porta 8000 dentro do contêiner 'api'.
-    ports:
-      - "8000:8000"
-
-    # 'volumes' neste serviço é usado para desenvolvimento em tempo real (Bind Mount).
-    # O formato é "CAMINHO_NO_HOST:CAMINHO_NO_CONTÊINER".
-    # O '.' representa o diretório atual do projeto na nossa máquina.
-    # '/app' é o WORKDIR que definimos no nosso Dockerfile.
-    # Resultado: Qualquer alteração de código que guardarmos no nosso editor
-    # será refletida instantaneamente dentro do contêiner, permitindo o hot-reload do Uvicorn.
-    volumes:
-      - .:/app
-
-    # 'environment' permite-nos injetar variáveis de ambiente diretamente
-    # no contêiner. A nossa aplicação Python pode então lê-las usando os.getenv().
-    # Esta é a forma correta de gerir configurações e segredos.
+    container_name: temp-data-api
+    restart: always
+    # 'expose' expõe a porta para outros contêineres na mesma rede, mas não
+    # para a máquina host. É mais seguro e o proxy sabe como encontrá-la.
+    # A porta 8000 foi extraída do seu Dockerfile.
+    expose:
+      - "8000"
+    # Variáveis de ambiente que instruem o nginx-proxy e o letsencrypt-companion
     environment:
-      # A URL de conexão que a nossa API vai usar para encontrar o banco de dados.
-      # O mais importante aqui é o host: '@db'. 'db' é o nome do nosso serviço
-      # de banco de dados abaixo. O Docker Compose cria uma rede interna e permite
-      # que os serviços se comuniquem uns com os outros usando os seus nomes de serviço
-      # como se fossem nomes de domínio.
-      - DATABASE_URL=postgresql://thalysson:bdtest@db:5432/apidblocal
-      - API_KEY=secretkey
+      # O domínio que o proxy deve escutar para direcionar para este contêiner.
+      - VIRTUAL_HOST=tempdatacenter.zapto.org
+      # A porta interna na qual sua aplicação está rodando.
+      - VIRTUAL_PORT=8000
+      # O domínio para o qual o Let's Encrypt deve gerar o certificado.
+      - LETSENCRYPT_HOST=tempdatacenter.zapto.org
+      # (Opcional, mas recomendado) Seu e-mail para receber notificações sobre a
+      # expiração do certificado. Descomente a linha abaixo e adicione seu e-mail.
+      - LETSENCRYPT_EMAIL=contato.thalyssondel@gmail.com
 
-    # 'depends_on' define a ordem de arranque dos serviços.
-    # Isto diz ao Docker Compose: "Não inicie o serviço 'api' até que
-    # o serviço 'db' esteja a funcionar". Isto previne que a nossa API
-    # falhe no arranque porque o banco de dados ainda não está pronto.
-    depends_on:
-      - db
+# --- FIM DOS SERVIÇOS ---
 
-  # --- SERVIÇO 2: O NOSSO BANCO DE DADOS POSTGRESQL ---
-  db:
-    # 'image' diz ao Compose para usar uma imagem pronta do Docker Hub,
-    # em vez de construir uma. 'postgres:15-alpine' é a imagem oficial
-    # do PostgreSQL na versão 15, usando o Alpine Linux como base,
-    # que é muito leve e seguro.
-    image: postgres:15-alpine
-
-    # Aqui também expomos a porta do banco de dados para a nossa máquina local.
-    # Isto é opcional, mas permite-nos conectar ao banco de dados com
-    # uma ferramenta cliente (como DBeaver, Beekeeper) a partir do nosso PC para
-    # depuração, verificação de dados, etc.
-    # Mapeamos a porta 5433 do nosso PC para a 5432 (porta padrão do Postgres) do contêiner.
-    ports:
-      - "5432:5432"
-
-    # Tal como na API, definimos variáveis de ambiente. A imagem oficial do Postgres
-    # foi desenhada para usar estas variáveis específicas para se autoconfigurar
-    # na primeira vez que é executada.
-    environment:
-      - POSTGRES_USER=thalysson      # Define o nome do superutilizador do banco.
-      - POSTGRES_PASSWORD=bdtest # Define a senha para esse utilizador.
-      - POSTGRES_DB=apidblocal            # Cria automaticamente uma base de dados com este nome.
-
-    # 'volumes' aqui é usado para PERSISTÊNCIA DE DADOS.
-    # Contêineres são efémeros. Se removermos o contêiner 'db', todos os dados dentro
-    # dele seriam perdidos. Para evitar isso, mapeamos a pasta interna onde o Postgres
-    # guarda os dados ('/var/lib/postgresql/data') para um 'volume' gerido pelo Docker.
-    # Este volume 'postgres_data' age como um disco rígido externo para o contêiner.
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-# A secção 'volumes' de nível superior é onde declaramos formalmente os volumes nomeados
-# que queremos que o Docker Compose crie e gira para nós.
-# Isto desacopla o ciclo de vida do volume do ciclo de vida do contêiner.
+# Definição dos volumes nomeados. Isso permite que os dados (como os certificados)
+# persistam mesmo que os contêineres sejam recriados.
 volumes:
-  # O nome do volume que usámos acima.
-  postgres_data:
+  certs:
+  vhost:
+  html:
