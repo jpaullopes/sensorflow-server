@@ -1,11 +1,10 @@
-# Versão do Docker Compose. '3.8' é uma versão moderna e estável.
-version: '3.8'
+# A linha 'version' foi removida por ser obsoleta nas novas versões do Docker Compose.
 
 # --- INÍCIO DA DEFINIÇÃO DOS SERVIÇOS/CONTÊINERES ---
 services:
 
   # 1. SERVIÇO DO NGINX REVERSE PROXY
-  # Este contêiner atua como o "porteiro" do seu servidor. Ele recebe todo o
+  # Este contentor atua como o "porteiro" do seu servidor. Ele recebe todo o
   # tráfego das portas 80 (HTTP) e 443 (HTTPS) e o direciona para a aplicação correta.
   nginx-proxy:
     image: nginxproxy/nginx-proxy
@@ -14,8 +13,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      # Volumes compartilhados para que os contêineres possam se comunicar e
-      # compartilhar os certificados SSL e configurações.
+      # Volumes partilhados para que os contentores possam comunicar e
+      # partilhar os certificados SSL e configurações.
       - certs:/etc/nginx/certs:ro
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
@@ -23,49 +22,50 @@ services:
     restart: always
 
   # 2. SERVIÇO DO LET'S ENCRYPT
-  # Este contêiner "ajudante" monitora os outros contêineres. Quando ele detecta
+  # Este contentor "ajudante" monitoriza os outros contentores. Quando ele deteta
   # um novo domínio (via variável de ambiente), ele automaticamente solicita,
   # gera e instala um certificado SSL gratuito. Ele também cuida da renovação.
   letsencrypt-companion:
     image: nginxproxy/acme-companion
     container_name: letsencrypt-companion
+    restart: always
     volumes:
-      # Precisa acessar os mesmos volumes do nginx-proxy para funcionar.
+      # Precisa de aceder aos mesmos volumes do nginx-proxy para funcionar.
       - certs:/etc/nginx/certs
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    restart: always
+    environment:
+      # --- CORREÇÃO APLICADA ---
+      # Esta linha diz explicitamente ao 'companion' qual contentor é o proxy.
+      # O nome 'nginx-proxy' deve corresponder ao 'container_name' do serviço do proxy.
+      - NGINX_PROXY_CONTAINER=nginx-proxy
 
   # 3. O SEU SERVIÇO DE API (CONSTRUÍDO DO SEU DOCKERFILE)
-  # Este é o contêiner da sua aplicação. O Docker Compose irá construí-lo
+  # Este é o contentor da sua aplicação. O Docker Compose irá construí-lo
   # automaticamente usando o Dockerfile que está na mesma pasta.
   api:
     # A instrução 'build: .' diz ao Compose para usar o Dockerfile no diretório atual ('.')
     build: .
     container_name: temp-data-api
     restart: always
-    # 'expose' expõe a porta para outros contêineres na mesma rede, mas não
+    # 'expose' expõe a porta para outros contentores na mesma rede, mas não
     # para a máquina host. É mais seguro e o proxy sabe como encontrá-la.
-    # A porta 8000 foi extraída do seu Dockerfile.
     expose:
       - "8000"
     # Variáveis de ambiente que instruem o nginx-proxy e o letsencrypt-companion
     environment:
-      # O domínio que o proxy deve escutar para direcionar para este contêiner.
       - VIRTUAL_HOST=tempdatacenter.zapto.org
-      # A porta interna na qual sua aplicação está rodando.
       - VIRTUAL_PORT=8000
-      # O domínio para o qual o Let's Encrypt deve gerar o certificado.
       - LETSENCRYPT_HOST=tempdatacenter.zapto.org
-      # (Opcional, mas recomendado) Seu e-mail para receber notificações sobre a
-      # expiração do certificado. Descomente a linha abaixo e adicione seu e-mail.
+      # (Opcional, mas recomendado) O seu e-mail para receber notificações sobre a
+      # expiração do certificado.
       - LETSENCRYPT_EMAIL=contato.thalyssondel@gmail.com
 
 # --- FIM DOS SERVIÇOS ---
 
 # Definição dos volumes nomeados. Isso permite que os dados (como os certificados)
-# persistam mesmo que os contêineres sejam recriados.
+# persistam mesmo que os contentores sejam recriados.
 volumes:
   certs:
   vhost:
