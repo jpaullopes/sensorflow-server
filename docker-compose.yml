@@ -4,8 +4,6 @@
 services:
 
   # 1. SERVIÇO DO NGINX REVERSE PROXY
-  # Este contentor atua como o "porteiro" do seu servidor. Ele recebe todo o
-  # tráfego das portas 80 (HTTP) e 443 (HTTPS) e o direciona para a aplicação correta.
   nginx-proxy:
     image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
@@ -13,8 +11,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      # Volumes partilhados para que os contentores possam comunicar e
-      # partilhar os certificados SSL e configurações.
       - certs:/etc/nginx/certs:ro
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
@@ -22,50 +18,38 @@ services:
     restart: always
 
   # 2. SERVIÇO DO LET'S ENCRYPT
-  # Este contentor "ajudante" monitoriza os outros contentores. Quando ele deteta
-  # um novo domínio (via variável de ambiente), ele automaticamente solicita,
-  # gera e instala um certificado SSL gratuito. Ele também cuida da renovação.
   letsencrypt-companion:
     image: nginxproxy/acme-companion
     container_name: letsencrypt-companion
     restart: always
     volumes:
-      # Precisa de aceder aos mesmos volumes do nginx-proxy para funcionar.
       - certs:/etc/nginx/certs
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      # --- CORREÇÃO APLICADA ---
-      # Esta linha diz explicitamente ao 'companion' qual contentor é o proxy.
-      # O nome 'nginx-proxy' deve corresponder ao 'container_name' do serviço do proxy.
       - NGINX_PROXY_CONTAINER=nginx-proxy
 
-  # 3. O SEU SERVIÇO DE API (CONSTRUÍDO DO SEU DOCKERFILE)
-  # Este é o contentor da sua aplicação. O Docker Compose irá construí-lo
-  # automaticamente usando o Dockerfile que está na mesma pasta.
+  # 3. O SEU SERVIÇO DE API
   api:
-    # A instrução 'build: .' diz ao Compose para usar o Dockerfile no diretório atual ('.')
     build: .
     container_name: temp-data-api
     restart: always
-    # 'expose' expõe a porta para outros contentores na mesma rede, mas não
-    # para a máquina host. É mais seguro e o proxy sabe como encontrá-la.
+    # --- CORREÇÃO PARA .env ---
+    # A diretiva 'env_file' carrega as variáveis de um arquivo .env
+    # para dentro do ambiente do contêiner.
+    env_file:
+      - .env
     expose:
       - "8000"
-    # Variáveis de ambiente que instruem o nginx-proxy e o letsencrypt-companion
     environment:
       - VIRTUAL_HOST=tempdatacenter.zapto.org
       - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=tempdatacenter.zapto.org
-      # (Opcional, mas recomendado) O seu e-mail para receber notificações sobre a
-      # expiração do certificado.
       - LETSENCRYPT_EMAIL=contato.thalyssondel@gmail.com
 
 # --- FIM DOS SERVIÇOS ---
 
-# Definição dos volumes nomeados. Isso permite que os dados (como os certificados)
-# persistam mesmo que os contentores sejam recriados.
 volumes:
   certs:
   vhost:
