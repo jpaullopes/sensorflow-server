@@ -44,9 +44,9 @@ services:
     expose:
       - "8000"
     environment:
-      - VIRTUAL_HOST=tempdatacenter.zapto.org
+      - VIRTUAL_HOST=sensorflow.zapto.org
       - VIRTUAL_PORT=8000
-      - LETSENCRYPT_HOST=tempdatacenter.zapto.org
+      - LETSENCRYPT_HOST=sensorflow.zapto.org
       - LETSENCRYPT_EMAIL=contato.thalyssondel@gmail.com
 
 # --- FIM DOS SERVIÇOS ---
