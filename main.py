@@ -87,6 +87,8 @@ class DataDB(Base):
     __tablename__ = "data"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     temperature = Column(Float, nullable=False)
+    humidity = Column(Float, nullable=False)
+    pressure = Column(Float, nullable=False)
     date_recorded = Column(Date, nullable=False, index=True)
     time_recorded = Column(Time, nullable=False, index=True)
     sensor_id = Column(String, nullable=False, index=True)
@@ -151,11 +153,15 @@ manager = ConnectionManager()
 # --- Pydantic Models ---
 class TemperatureReadingPayload(BaseModel):
     temperature: float
+    humidity: float # CAMPO OBRIGATÓRIO: Umidade
+    pressure: float # CAMPO OBRIGATÓRIO: Pressão
     sensor_id: str
 
 class TemperatureDataResponse(BaseModel):
     id: Optional[int] = None
     temperature: float
+    humidity: float # CAMPO OBRIGATÓRIO: Umidade
+    pressure: float # CAMPO OBRIGATÓRIO: Pressão
     date_recorded: date_type
     time_recorded: time_type
     sensor_id: str
@@ -183,7 +189,7 @@ def get_db():
 
 # --- Router for Endpoints ---
 router = APIRouter()
-app = FastAPI(title="Resilient Temperature Sensor API")
+app = FastAPI(title="Resilient Sensor API")
 
 # --- Jinja2Templates Configuration ---
 templates = Jinja2Templates(directory="templates")
@@ -275,15 +281,22 @@ async def submit_temperature_reading_http(
     date_to_store = brasilia_now.date()
     time_to_store = brasilia_now.time().replace(microsecond=0)
 
-    logger.info(f"HTTP: Temperatura recebida de {sensor_id}: {payload.temperature}°C")
+    # Log dos novos dados recebidos
+    logger.info(f"HTTP: Dados recebidos de {sensor_id}: Temp: {payload.temperature}°C, Umidade: {payload.humidity}%, Pressão: {payload.pressure} hPa")
 
     db_data_entry = None
 
     if app_state.db_is_connected and db:
         try:
+            # Inclusão dos novos campos ao criar o objeto do banco de dados
             db_data_entry = DataDB(
-                temperature=payload.temperature, date_recorded=date_to_store,
-                time_recorded=time_to_store, sensor_id=sensor_id, client_ip=client_ip
+                temperature=payload.temperature,
+                humidity=payload.humidity,
+                pressure=payload.pressure,
+                date_recorded=date_to_store,
+                time_recorded=time_to_store,
+                sensor_id=sensor_id,
+                client_ip=client_ip
             )
             db.add(db_data_entry)
             db.commit()
@@ -300,10 +313,16 @@ async def submit_temperature_reading_http(
     else:
         logger.warning(f"WARNING: Database unavailable. Data from {sensor_id} will not be saved.")
 
+    # Inclusão dos novos campos nos dados que serão enviados via WebSocket
     data_to_broadcast = TemperatureDataResponse(
         id=db_data_entry.id if db_data_entry else None,
-        temperature=payload.temperature, date_recorded=date_to_store,
-        time_recorded=time_to_store, sensor_id=sensor_id, client_ip=client_ip
+        temperature=payload.temperature,
+        humidity=payload.humidity,
+        pressure=payload.pressure,
+        date_recorded=date_to_store,
+        time_recorded=time_to_store,
+        sensor_id=sensor_id,
+        client_ip=client_ip
     )
 
     await manager.broadcast_json(data_to_broadcast.model_dump(mode='json'))
@@ -342,6 +361,7 @@ async def websocket_sensor_updates_endpoint(
         try:
             last_data_entry = db.query(DataDB).order_by(DataDB.id.desc()).first()
             if last_data_entry:
+                # O from_orm já vai incluir os novos campos automaticamente
                 await websocket.send_json(TemperatureDataResponse.from_orm(last_data_entry).model_dump(mode='json'))
         except Exception as e:
             app_state.db_is_connected = False
