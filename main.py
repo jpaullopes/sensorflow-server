@@ -13,7 +13,7 @@ import colorlog # Importe colorlog
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Date, Time, inspect as sqlalchemy_inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import OperationalError, ArgumentError # Import both errors
+from sqlalchemy.exc import OperationalError, ArgumentError, IntegrityError # Importe o IntegrityError
 
 # Timestamp and Timezone
 from datetime import datetime, date as date_type, time as time_type
@@ -226,13 +226,17 @@ async def on_startup():
             with engine.connect() as connection:
                 logger.info("Database connection established successfully.")
 
-                inspector = sqlalchemy_inspect(engine)
-                if not inspector.has_table(DataDB.__tablename__):
-                    logger.info(f"Table '{DataDB.__tablename__}' not found. Attempting to create...")
+                # --- CORREÇÃO PARA MÚLTIPLOS WORKERS ---
+                # Esta lógica agora é segura para ser executada por múltiplos workers ao mesmo tempo.
+                # O primeiro worker a executar criará as tabelas. Os outros irão gerar um
+                # IntegrityError, que é capturado e ignorado, pois a tabela já existe.
+                try:
+                    logger.info("Ensuring database tables are created...")
                     Base.metadata.create_all(bind=engine)
-                    logger.info(f"Table '{DataDB.__tablename__}' created successfully.")
-                else:
-                    logger.info(f"Table '{DataDB.__tablename__}' already exists. No action needed.")
+                    logger.info("Tables are ready.")
+                except IntegrityError:
+                    logger.warning("Tables already exist, which is normal in a multi-worker environment. Continuing...")
+                    pass # Ignora o erro, pois a tabela já foi criada por outro worker.
 
             app_state.db_is_connected = True
 
