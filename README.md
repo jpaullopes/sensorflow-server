@@ -209,6 +209,54 @@ O Grafana está pré-configurado para conectar automaticamente ao PostgreSQL e v
 - Dashboards prontos para usar
 - Atualizações em tempo real dos dados
 
+## 🎯 Grafana Provisioning (Configuração Automática)
+
+### 📋 Como funciona o "Manual de Instruções"
+
+O Grafana está configurado para conectar **automaticamente** ao PostgreSQL através de um processo chamado **Provisioning**. É como se déssemos um "manual de instruções" para o Grafana seguir quando ele inicia.
+
+#### 🗂️ Estrutura do Provisioning:
+```
+grafana/
+└── provisioning/
+    ├── datasources/
+    │   └── datasource.yml      # 🔗 Conecta automaticamente ao PostgreSQL
+    └── dashboards/
+        ├── dashboard.yml       # ⚙️ Configuração dos dashboards
+        └── sensors-dashboard.json # 📊 Dashboard pré-configurado
+```
+
+#### 🔧 Como o Docker Compose conecta tudo:
+```yaml
+grafana:
+  env_file: - .env                    # 🔑 "Cola" com senhas e credenciais
+  volumes:
+    - ./grafana/provisioning:/etc/grafana/provisioning  # 📋 "Manual de Instruções"
+```
+
+#### 🎯 O que acontece automaticamente:
+
+1. **Grafana inicia** → Lê o arquivo `datasource.yml`
+2. **Encontra variáveis** → `${POSTGRES_USER}`, `${POSTGRES_PASSWORD}`, `${POSTGRES_DB}`
+3. **Consulta o .env** → Substitui as variáveis pelos valores reais
+4. **Conecta ao banco** → Cria automaticamente a fonte de dados "PostgreSQL Sensores"
+5. **Carrega dashboards** → Dashboard pré-configurado já disponível
+
+#### 📊 Dashboard Pré-configurado inclui:
+- **Temperatura ao longo do tempo** (gráfico de linha)
+- **Umidade relativa** (gráfico de linha)  
+- **Pressão atmosférica** (gráfico de linha)
+- **Distribuição por sensor** (gráfico de pizza)
+
+### 🚀 Resultado Final:
+Quando você acessa `http://localhost:3000` pela primeira vez:
+- ✅ Fonte de dados PostgreSQL já configurada
+- ✅ Dashboard "Sensores IoT" pronto para usar
+- ✅ Gráficos funcionando automaticamente
+- ✅ Dados em tempo real conforme chegam na API
+
+**Não precisa configurar nada manualmente!** 🎉
+
 ## � Segurança
 
 - **API Keys Duplas**: Separação entre HTTP e WebSocket
