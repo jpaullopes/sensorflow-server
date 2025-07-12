@@ -2,6 +2,7 @@
 
 ![Linguagem](https://img.shields.io/badge/Linguagem-python-green.svg)
 ![Badge de Versão](https://img.shields.io/badge/version-1.0.0-blue)
+![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow.svg)
 
 Uma aplicação robusta de backend desenvolvida em Python com FastAPI, projetada para coletar, armazenar e distribuir dados de sensores em tempo real. A arquitetura é otimizada para ser resiliente e escalável, utilizando Docker para fácil implantação.
 
