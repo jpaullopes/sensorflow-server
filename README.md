@@ -219,11 +219,8 @@ O Grafana está configurado para conectar **automaticamente** ao PostgreSQL atra
 ```
 grafana/
 └── provisioning/
-    ├── datasources/
-    │   └── datasource.yml      # 🔗 Conecta automaticamente ao PostgreSQL
-    └── dashboards/
-        ├── dashboard.yml       # ⚙️ Configuração dos dashboards
-        └── sensors-dashboard.json # 📊 Dashboard pré-configurado
+    └── datasources/
+        └── datasource.yml      # 🔗 Conecta automaticamente ao PostgreSQL
 ```
 
 #### 🔧 Como o Docker Compose conecta tudo:
@@ -240,22 +237,28 @@ grafana:
 2. **Encontra variáveis** → `${POSTGRES_USER}`, `${POSTGRES_PASSWORD}`, `${POSTGRES_DB}`
 3. **Consulta o .env** → Substitui as variáveis pelos valores reais
 4. **Conecta ao banco** → Cria automaticamente a fonte de dados "PostgreSQL Sensores"
-5. **Carrega dashboards** → Dashboard pré-configurado já disponível
-
-#### 📊 Dashboard Pré-configurado inclui:
-- **Temperatura ao longo do tempo** (gráfico de linha)
-- **Umidade relativa** (gráfico de linha)  
-- **Pressão atmosférica** (gráfico de linha)
-- **Distribuição por sensor** (gráfico de pizza)
+5. **Pronto para usar** → Você pode criar seus próprios dashboards
 
 ### 🚀 Resultado Final:
 Quando você acessa `http://localhost:3000` pela primeira vez:
-- ✅ Fonte de dados PostgreSQL já configurada
-- ✅ Dashboard "Sensores IoT" pronto para usar
-- ✅ Gráficos funcionando automaticamente
-- ✅ Dados em tempo real conforme chegam na API
+- ✅ Fonte de dados PostgreSQL já configurada e conectada
+- ✅ Pronto para criar dashboards personalizados
+- ✅ Acesso direto à tabela `data` com todos os campos dos sensores
+- ✅ Dados atualizados em tempo real conforme chegam na API
 
-**Não precisa configurar nada manualmente!** 🎉
+### 📊 Criando seus Dashboards:
+1. Acesse `http://localhost:3000`
+2. Login: `admin` / Senha: valor do `.env` (`GF_SECURITY_ADMIN_PASSWORD`)
+3. Clique em "+" → "Dashboard" → "Add new panel"
+4. A fonte "PostgreSQL Sensores" já estará disponível
+5. Use queries como:
+   ```sql
+   SELECT date_recorded + time_recorded as time, temperature 
+   FROM data 
+   WHERE $__timeFilter(date_recorded + time_recorded)
+   ```
+
+**Não precisa configurar conexão - só criar os gráficos que você quiser!** �
 
 ## � Segurança
 
