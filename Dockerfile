@@ -1,33 +1,39 @@
-# Usar uma imagem base oficial do Python.
-# python:3.13-slim é uma boa escolha para um tamanho de imagem menor.
-FROM python:3.13-slim
+# Usar uma imagem base oficial do Python
+FROM python:3.11-slim
 
-# Definir variáveis de ambiente para evitar que o Python gere ficheiros .pyc e para o buffer de saída.
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Definir variáveis de ambiente
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
 
-# Definir o diretório de trabalho dentro do contentor.clea
+# Definir o diretório de trabalho
 WORKDIR /app
 
-# Copiar o ficheiro de requisitos primeiro para aproveitar o cache do Docker.
-# Se requirements.txt não mudar, esta camada não será reconstruída.
-COPY requirements.txt .
+# Instalar dependências do sistema necessárias
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Instalar as dependências do projeto.
-# --no-cache-dir para reduzir o tamanho da imagem.
-# --upgrade pip para garantir que temos a versão mais recente do pip.
+# Copiar e instalar dependências Python
+COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copiar todo o código da aplicação para o diretório de trabalho /app.
-COPY . .
+# Copiar código da aplicação
+COPY src/ ./src/
+COPY main.py .
 
-# Expor a porta em que a aplicação Uvicorn será executada (o padrão é 8000).
+# Criar usuário não-root para segurança
+RUN useradd --create-home --shell /bin/bash app && \
+    chown -R app:app /app
+USER app
+
+# Expor porta da aplicação
 EXPOSE 8000
 
-# Comando para executar a aplicação Uvicorn.
-# Substitua "main" pelo nome do seu ficheiro Python principal se for diferente.
-# Substitua "app" pelo nome da sua instância FastAPI se for diferente.
-# O host 0.0.0.0 torna a aplicação acessível de fora do contentor.
-# O Gunicorn irá gerir os processos de trabalho do Uvicorn.
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "2", "-b", "0.0.0.0:8000", "main:app"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Comando para executar a aplicação
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
