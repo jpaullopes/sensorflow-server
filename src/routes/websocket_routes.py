@@ -3,12 +3,12 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status, Depends, 
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from models import TemperatureDataResponse, DataDB
-from database import get_db
-from auth import verify_websocket_api_key
-from config import app_state, MAX_WS_CONNECTIONS_PER_KEY
-from websocket_manager import manager
-from logger_config import setup_logger
+from ..models import TemperatureDataResponse, DataDB
+from ..database import get_db
+from ..auth import verify_websocket_api_key
+from ..config import app_state, MAX_WS_CONNECTIONS_PER_KEY
+from ..websocket_manager import manager
+from ..logger_config import setup_logger
 
 router = APIRouter()
 logger = setup_logger(__name__)

@@ -1,7 +1,7 @@
 # auth.py
 from fastapi import HTTPException, status, Header
-from config import EXPECTED_API_KEY, EXPECTED_API_KEY_WS
-from logger_config import setup_logger
+from .config import EXPECTED_API_KEY, EXPECTED_API_KEY_WS
+from .logger_config import setup_logger
 
 logger = setup_logger(__name__)
 

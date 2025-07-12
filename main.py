@@ -1,10 +1,10 @@
 # main.py
 from fastapi import FastAPI
 
-from config import app_state, EXPECTED_API_KEY, EXPECTED_API_KEY_WS, MAX_WS_CONNECTIONS_PER_KEY
-from database import initialize_database
-from routes import api_router, websocket_router
-from logger_config import setup_logger
+from src.config import app_state, EXPECTED_API_KEY, EXPECTED_API_KEY_WS, MAX_WS_CONNECTIONS_PER_KEY
+from src.database import initialize_database
+from src.routes import api_router, websocket_router
+from src.logger_config import setup_logger
 
 # Setup logger
 logger = setup_logger(__name__)

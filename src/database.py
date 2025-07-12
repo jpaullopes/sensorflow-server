@@ -4,9 +4,9 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import OperationalError, ArgumentError, IntegrityError
 from typing import Optional
 
-from config import DATABASE_URL, app_state
-from models import Base
-from logger_config import setup_logger
+from .config import DATABASE_URL, app_state
+from .models import Base
+from .logger_config import setup_logger
 
 logger = setup_logger(__name__)
 

@@ -1,8 +1,8 @@
 # websocket_manager.py
 from fastapi import WebSocket
 from typing import List, Dict
-from config import MAX_WS_CONNECTIONS_PER_KEY
-from logger_config import setup_logger
+from .config import MAX_WS_CONNECTIONS_PER_KEY
+from .logger_config import setup_logger
 
 logger = setup_logger(__name__)
 
