@@ -1,117 +1,177 @@
 # SensorFlow Server
 
-![Linguagem](https://img.shields.io/badge/Linguagem-python-green.svg)
-![Badge de Versão](https://img.shields.io/badge/version-2.0.0-blue)
-![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow.svg)
+[![Python](https://img.shields.io/badge/Python-3.9+-green.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.95+-blue)](https://fastapi.tiangolo.com/)
+[![Version](https://img.shields.io/badge/version-2.0.0-brightgreen)](https://github.com/jpaullopes/sensorflow-server)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Uma aplicação de backend desenvolvida em Python com FastAPI, projetada para coletar, armazenar e distribuir dados de sensores em tempo real. A arquitetura modular é otimizada para ser resiliente, escalável e de fácil manutenção.
+**SensorFlow Server** é uma solução backend escalável e resiliente desenvolvida em Python/FastAPI para gerenciamento de dados de sensores em tempo real. Oferece persistência em PostgreSQL, visualização via Grafana, e comunicação bidirecional via WebSockets.
+
+---
+
+## � Índice
+
+- [Funcionalidades](#-funcionalidades)
+- [Arquitetura](#-arquitetura)
+- [Tecnologias](#-tecnologias)
+- [Instalação](#-instalação)
+- [API Endpoints](#-api-endpoints)
+- [Integração Grafana](#-integração-grafana)
+- [Segurança](#-segurança)
+- [Monitoramento](#-monitoramento)
+- [Desenvolvimento](#-desenvolvimento)
+- [Licença](#-licença)
 
 ## 🚀 Funcionalidades
 
-- **API REST Segura**: Recebe dados de sensores (temperatura, umidade e pressão) através de endpoint HTTP POST protegido por API Key
-- **WebSocket em Tempo Real**: Distribui instantaneamente os dados recebidos para todos os clientes conectados
-- **Banco de Dados PostgreSQL**: Armazenamento persistente com criação automática de tabelas
-- **Visualização com Grafana**: Dashboard integrado para monitoramento e análise dos dados
-- **Autenticação Dupla**: API Keys separadas para HTTP e WebSocket
-- **Limite de Conexões**: Controle configurável de conexões WebSocket por API Key
-- **Logs Coloridos**: Sistema de logging avançado com cores para melhor debugging
-- **Arquitetura Modular**: Código organizado em módulos específicos para facilitar manutenção
-- **Docker Compose**: Stack completa com API + PostgreSQL + Grafana
+- **API REST Segura**: Endpoints protegidos por API Key para recepção de dados de sensores
+- **WebSocket em Tempo Real**: Distribuição instantânea de dados para clientes conectados
+- **Banco de Dados PostgreSQL**: Armazenamento persistente com schemas auto-gerenciados
+- **Visualização com Grafana**: Dashboards personalizáveis para análise de dados
+- **Autenticação Dupla**: API Keys independentes para HTTP e WebSocket
+- **Limitação de Conexões**: Controle granular de conexões por API Key
+- **Logs Estruturados**: Sistema avançado com níveis e formatação colorida
+- **Arquitetura Modular**: Código organizado por responsabilidades
+- **Docker Compose**: Stack completa com orquestração de serviços
 
-## 🏗️ Arquitetura Modular
+## 🏗️ Arquitetura
 
-```
+O projeto segue um padrão de arquitetura modular, com separação clara de responsabilidades:
+
+```plaintext
 sensorflow-server/
-├── main.py                    # 🚀 Ponto de entrada da aplicação
-├── src/                       # 📁 Código fonte modular
-│   ├── __init__.py           # 📦 Inicialização do pacote
-│   ├── config.py             # ⚙️ Configurações e variáveis de ambiente
-│   ├── logger_config.py      # 📝 Sistema de logs coloridos
-│   ├── models.py             # 🏗️ Modelos SQLAlchemy e Pydantic
-│   ├── database.py           # 💾 Configuração e conexão do banco
-│   ├── auth.py               # 🔐 Autenticação e verificação de API Keys
-│   ├── websocket_manager.py  # 🌐 Gerenciamento de conexões WebSocket
-│   └── routes/               # �️ Endpoints organizados
-│       ├── __init__.py       # 📦 Exportação dos roteadores
-│       ├── api_routes.py     # 📡 Endpoints HTTP da API
-│       └── websocket_routes.py # 🔌 Endpoints WebSocket
-├── docker-compose.yml        # 🐳 Orquestração dos serviços
-├── Dockerfile               # 🐳 Imagem da aplicação
-├── requirements.txt         # 📋 Dependências Python
-└── README.md               # 📖 Documentação
+├── main.py                   # Ponto de entrada da aplicação
+├── src/                      # Código fonte modular
+│   ├── config.py            # Configurações e variáveis de ambiente
+│   ├── logger_config.py     # Sistema de logs coloridos
+│   ├── models.py            # Modelos SQLAlchemy e Pydantic
+│   ├── database.py          # Configuração e conexão do banco
+│   ├── auth.py              # Autenticação e verificação de API Keys
+│   ├── websocket_manager.py # Gerenciamento de conexões WebSocket
+│   └── routes/              # Endpoints organizados por domínio
+├── docker-compose.yml        # Orquestração dos serviços
+├── Dockerfile                # Definição da imagem de contêiner
+├── requirements.txt          # Dependências Python
+├── grafana/                  # Configuração do Grafana
+│   └── provisioning/         # Provisionamento automático
+│       └── datasources/      # Fontes de dados pré-configuradas
+└── README.md                 # Documentação do projeto
 
-## 📋 Pré-requisitos
+## �️ Tecnologias
 
-Antes de começar, garanta que você tenha as seguintes ferramentas instaladas:
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-
-## ⚙️ Instalação e Execução
-
-## 🛠️ Tecnologias Utilizadas
-
-- **Backend**: Python, FastAPI
-- **Banco de Dados**: PostgreSQL (via SQLAlchemy)
+- **Backend**: Python 3.9+, FastAPI
+- **Banco de Dados**: PostgreSQL 13+
+- **ORM**: SQLAlchemy 2.0+
+- **Validação**: Pydantic v2
+- **Comunicação**: WebSockets
 - **Visualização**: Grafana OSS
-- **Comunicação em Tempo Real**: WebSockets
 - **Contêineres**: Docker, Docker Compose
-- **Logging**: ColorLog para logs coloridos
+- **Logging**: ColorLog
 
-## 📋 Pré-requisitos
+## ⚙️ Instalação
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+### Pré-requisitos
 
-## ⚙️ Instalação e Execução
+- [Docker](https://docs.docker.com/get-docker/) (v20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0+)
 
-### 1. Clone o Repositório
+### Configuração Rápida
+
+1. **Clone o repositório**
 
 ```bash
 git clone https://github.com/jpaullopes/sensorflow-server.git
 cd sensorflow-server
 ```
 
-### 2. Configure as Variáveis de Ambiente
+2. **Configure o ambiente**
 
-Crie um arquivo `.env` na raiz do projeto:
+Crie um arquivo `.env` na raiz:
 
 ```dotenv
-# API Keys para proteger os endpoints
+# API Keys de segurança
 API_KEY=sua_chave_http_secreta
 API_KEY_WS=sua_chave_websocket_secreta
 
-# Configuração do PostgreSQL
+# PostgreSQL
 POSTGRES_USER=sensoruser
 POSTGRES_PASSWORD=sensorpass
 POSTGRES_DB=sensordb
 DATABASE_URL=postgresql://sensoruser:sensorpass@db:5432/sensordb
 
-# Limite de conexões WebSocket por chave (0 = ilimitado)
+# Limites de conexão
 MAX_WS_CONNECTIONS_PER_KEY=10
 
-# Grafana (opcional)
+# Grafana
 GF_SECURITY_ADMIN_PASSWORD=admin123
 ```
 
-### 3. Execute com Docker Compose
+3. **Inicie a stack**
 
 ```bash
-# Iniciar todos os serviços
 docker-compose up -d
-
-# Ver logs em tempo real
-docker-compose logs -f
-
-# Parar os serviços
-docker-compose down
 ```
 
-### 4. Acesse os Serviços
+4. **Acesse os serviços**
 
-- **API Sensor**: http://localhost:8000
-- **Grafana Dashboard**: http://localhost:3000
-  - Usuário: `admin`
-  - Senha: valor definido em `GF_SECURITY_ADMIN_PASSWORD`
+- **API**: [http://localhost:8000](http://localhost:8000)
+- **Grafana**: [http://localhost:3000](http://localhost:3000) (admin/sua_senha)
+
+## � API Endpoints
+
+### Recepção de Dados de Sensores
+
+**POST** `/api/temperature_reading`
+
+Endpoint para envio de dados de sensores, protegido por API Key.
+
+**Headers necessários:**
+- `X-API-Key`: Chave de autenticação para API
+- `Content-Type`: application/json
+
+**Payload:**
+```json
+{
+  "temperature": 25.5,    // Temperatura em Celsius
+  "humidity": 60.2,       // Umidade relativa (%)
+  "pressure": 1012.5,     // Pressão atmosférica (hPa)
+  "sensor_id": "sensor_001" // ID único do sensor
+}
+```
+
+**Resposta (201 Created):**
+```json
+{
+  "id": 123,
+  "temperature": 25.5,
+  "humidity": 60.2,
+  "pressure": 1012.5,
+  "date_recorded": "2023-07-12",
+  "time_recorded": "14:30:45",
+  "sensor_id": "sensor_001",
+  "client_ip": "192.168.1.100"
+}
+```
+
+### WebSocket para Tempo Real
+
+**Endpoint:** `/ws/sensor_updates`
+
+Conexão WebSocket para receber dados em tempo real.
+
+**Parâmetros de Query:**
+- `api-key`: Chave de autenticação para WebSocket
+
+**Exemplo JavaScript:**
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws/sensor_updates?api-key=sua_chave_websocket');
+
+ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    console.log('Dados recebidos:', data);
+    // Processamento em tempo real
+};
+```
 
 ## 📡 API Endpoints
 
@@ -168,148 +228,117 @@ ws.onmessage = function(event) {
 };
 ```
 
-## 🏗️ Estrutura dos Dados
+## 📊 Integração Grafana
 
-### Payload de Entrada
-```json
-{
-  "temperature": 25.5,    // Temperatura em Celsius
-  "humidity": 60.2,       // Umidade relativa em %
-  "pressure": 1012.5,     // Pressão atmosférica em hPa
-  "sensor_id": "sensor_001" // Identificador único do sensor
-}
+O SensorFlow Server implementa provisionamento automático do Grafana, permitindo visualização imediata dos dados sem configuração manual.
+
+### Provisionamento Automático
+
+O sistema utiliza um mecanismo de provisionamento que configura automaticamente:
+
+- Fonte de dados PostgreSQL
+- Conexão segura com variáveis de ambiente
+- Acesso direto à tabela de dados dos sensores
+
+### Criação de Dashboards
+
+1. Acesse o Grafana em [http://localhost:3000](http://localhost:3000)
+2. Faça login com as credenciais (admin/sua_senha)
+3. Crie um novo dashboard: "+" → "Dashboard" → "Add new panel"
+4. A fonte de dados "PostgreSQL Sensores" estará disponível para consultas
+
+**Exemplo de Query SQL:**
+```sql
+SELECT 
+  date_recorded + time_recorded as time, 
+  temperature, 
+  humidity, 
+  pressure
+FROM data 
+WHERE 
+  $__timeFilter(date_recorded + time_recorded) AND
+  sensor_id = 'sensor_001'
 ```
 
-### Resposta Completa
-```json
-{
-  "id": 123,                    // ID único no banco de dados
-  "temperature": 25.5,          // Temperatura recebida
-  "humidity": 60.2,             // Umidade recebida
-  "pressure": 1012.5,           // Pressão recebida
-  "date_recorded": "2025-07-12", // Data de registro (fuso horário Brasil)
-  "time_recorded": "14:30:45",   // Hora de registro (fuso horário Brasil)
-  "sensor_id": "sensor_001",     // ID do sensor
-  "client_ip": "192.168.1.100"  // IP do cliente que enviou
-}
-```
+## 🔒 Segurança
 
-## 📊 Grafana Dashboard
+O SensorFlow Server implementa múltiplas camadas de segurança:
 
-O Grafana está pré-configurado para conectar automaticamente ao PostgreSQL e visualizar:
+- **API Keys Independentes**: Separação de chaves entre HTTP e WebSocket
+- **Limitação de Conexões**: Controle configurável de conexões por API Key
+- **Validação de Dados**: Validação automática via Pydantic
+- **Sanitização de Inputs**: Proteção contra injeção SQL
+- **Logs Detalhados**: Rastreamento de atividades para auditoria
 
-- **Temperatura ao longo do tempo**
-- **Umidade relativa**
-- **Pressão atmosférica**
-- **Dados por sensor**
-- **Estatísticas em tempo real**
+A configuração de segurança é gerenciada através do arquivo `.env`, permitindo customização sem alteração de código.
 
-### Configuração Automática
-- Datasource PostgreSQL configurado automaticamente
-- Dashboards prontos para usar
-- Atualizações em tempo real dos dados
+## 📝 Monitoramento
 
-## 🎯 Grafana Provisioning (Configuração Automática)
+O sistema fornece recursos avançados de monitoramento:
 
-### 📋 Como funciona o "Manual de Instruções"
-
-O Grafana está configurado para conectar **automaticamente** ao PostgreSQL através de um processo chamado **Provisioning**. É como se déssemos um "manual de instruções" para o Grafana seguir quando ele inicia.
-
-#### 🗂️ Estrutura do Provisioning:
-```
-grafana/
-└── provisioning/
-    └── datasources/
-        └── datasource.yml      # 🔗 Conecta automaticamente ao PostgreSQL
-```
-
-#### 🔧 Como o Docker Compose conecta tudo:
-```yaml
-grafana:
-  env_file: - .env                    # 🔑 "Cola" com senhas e credenciais
-  volumes:
-    - ./grafana/provisioning:/etc/grafana/provisioning  # 📋 "Manual de Instruções"
-```
-
-#### 🎯 O que acontece automaticamente:
-
-1. **Grafana inicia** → Lê o arquivo `datasource.yml`
-2. **Encontra variáveis** → `${POSTGRES_USER}`, `${POSTGRES_PASSWORD}`, `${POSTGRES_DB}`
-3. **Consulta o .env** → Substitui as variáveis pelos valores reais
-4. **Conecta ao banco** → Cria automaticamente a fonte de dados "PostgreSQL Sensores"
-5. **Pronto para usar** → Você pode criar seus próprios dashboards
-
-### 🚀 Resultado Final:
-Quando você acessa `http://localhost:3000` pela primeira vez:
-- ✅ Fonte de dados PostgreSQL já configurada e conectada
-- ✅ Pronto para criar dashboards personalizados
-- ✅ Acesso direto à tabela `data` com todos os campos dos sensores
-- ✅ Dados atualizados em tempo real conforme chegam na API
-
-### 📊 Criando seus Dashboards:
-1. Acesse `http://localhost:3000`
-2. Login: `admin` / Senha: valor do `.env` (`GF_SECURITY_ADMIN_PASSWORD`)
-3. Clique em "+" → "Dashboard" → "Add new panel"
-4. A fonte "PostgreSQL Sensores" já estará disponível
-5. Use queries como:
-   ```sql
-   SELECT date_recorded + time_recorded as time, temperature 
-   FROM data 
-   WHERE $__timeFilter(date_recorded + time_recorded)
-   ```
-
-**Não precisa configurar conexão - só criar os gráficos que você quiser!** �
-
-## � Segurança
-
-- **API Keys Duplas**: Separação entre HTTP e WebSocket
-- **Limite de Conexões**: Controle configurável por API Key
-- **Validação de Dados**: Modelos Pydantic para validação automática
-- **Logs Detalhados**: Rastreamento completo de todas as operações
-
-## 🐳 Docker Services
-
-| Serviço | Porta | Descrição |
-|---------|-------|-----------|
-| **api** | 8000 | API FastAPI principal |
-| **db** | 5432 | PostgreSQL database |
-| **grafana** | 3000 | Dashboard e visualização |
-
-## 📝 Logs e Monitoramento
+### Logs de Serviços
 
 ```bash
-# Ver logs de todos os serviços
+# Monitorar todos os serviços
 docker-compose logs -f
 
-# Ver logs apenas da API
+# Filtrar por serviço específico
 docker-compose logs -f api
-
-# Ver logs do banco de dados
 docker-compose logs -f db
-
-# Ver logs do Grafana
 docker-compose logs -f grafana
 ```
 
-## 📝 Desenvolvimento
+### Métricas Disponíveis
 
-### Estrutura do Código
-- **Modular**: Cada funcionalidade em seu próprio módulo
-- **Testável**: Módulos independentes facilitam testes
-- **Escalável**: Fácil adicionar novas funcionalidades
-- **Manutenível**: Código organizado e bem documentado
+- Latência de processamento de requests
+- Taxa de ingestão de dados
+- Conexões WebSocket ativas
+- Estatísticas de uso do banco de dados
 
-### Contribuindo
-1. Fork o projeto
-2. Crie sua feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+## 🔍 Desenvolvimento
+
+### Princípios de Design
+
+O SensorFlow Server foi construído seguindo princípios de engenharia de software modernos:
+
+- **Separação de Responsabilidades**: Cada módulo tem um propósito específico
+- **Injeção de Dependências**: Redução de acoplamento entre componentes
+- **Abstração de Dados**: Interfaces bem definidas entre camadas
+- **Configuração Externa**: Parâmetros definidos via variáveis de ambiente
+- **Testabilidade**: Estrutura projetada para facilitar testes unitários e de integração
+
+### Extensão da Aplicação
+
+O projeto foi projetado para ser extensível. Você pode:
+
+- Adicionar novos tipos de sensores
+- Implementar novas estratégias de autenticação
+- Criar endpoints personalizados
+- Expandir a lógica de processamento de dados
+
+### Contribuição
+
+1. Faça um fork do repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
+3. Implemente suas mudanças com testes apropriados
+4. Documente alterações no README, se necessário
+5. Envie um Pull Request com descrição detalhada das mudanças
+
+## 📊 Serviços
+
+| Serviço    | Porta | Descrição                  | URL Local                   |
+|------------|-------|----------------------------|----------------------------|
+| **API**    | 8000  | Backend FastAPI            | http://localhost:8000      |
+| **DB**     | 5432  | Banco de dados PostgreSQL  | postgresql://localhost:5432 |
+| **Grafana**| 3000  | Visualização de dados      | http://localhost:3000      |
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+Este projeto está licenciado sob os termos da licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 ---
 
-**Desenvolvido com ❤️ por João Paulo**
+<p align="center">
+  <b>Desenvolvido com ❤️ por João Paulo</b><br>
+  <a href="https://github.com/jpaullopes">GitHub</a>
+</p>
