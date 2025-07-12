@@ -56,6 +56,7 @@ sensorflow-server/
 │   └── provisioning/         # Provisionamento automático
 │       └── datasources/      # Fontes de dados pré-configuradas
 └── README.md                 # Documentação do projeto
+```
 
 ## �️ Tecnologias
 
@@ -336,9 +337,4 @@ O projeto foi projetado para ser extensível. Você pode:
 
 Este projeto está licenciado sob os termos da licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
----
 
-<p align="center">
-  <b>Desenvolvido com ❤️ por João Paulo</b><br>
-  <a href="https://github.com/jpaullopes">GitHub</a>
-</p>
