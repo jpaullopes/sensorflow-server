@@ -277,7 +277,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n  sensor_id,\r\n  AVG(temperature) as \"Média de Temperatura\"\r\nFROM data\r\nWHERE\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded BETWEEN $_timeFrom() AND $_timeTo()\r\nGROUP BY sensor_id\r\nORDER BY \"Média de Temperatura\" DESC;",
+          "rawSql": "SELECT\r\n  sensor_id,\r\n  AVG(temperature) as \"Média de Temperatura\"\r\nFROM data\r\nWHERE\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded BETWEEN $__timeFrom() AND $__timeTo()\r\nGROUP BY sensor_id\r\nORDER BY \"Média de Temperatura\" DESC;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -361,7 +361,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n  COUNT(DISTINCT sensor_id) AS \"Sensores Ativos\"\r\nFROM data\r\nWHERE\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded BETWEEN $_timeFrom() AND $_timeTo();",
+          "rawSql": "SELECT\r\n  COUNT(DISTINCT sensor_id) AS \"Sensores Ativos\"\r\nFROM data\r\nWHERE\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded BETWEEN $___timeFrom() AND $___timeTo();",
           "refId": "A",
           "sql": {
             "columns": [
@@ -486,7 +486,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n  -- Combina data e hora em um único campo de timestamp chamado \"time\"\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded AS \"time\",\r\n  temperature AS \"Temperatura\",\r\n  humidity AS \"Umidade\",\r\n  pressure AS \"Pressão\",\r\n  sensor_id\r\nFROM data\r\nWHERE\r\n  -- Filtra os dados pelo intervalo de tempo selecionado no Grafana\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded BETWEEN $_timeFrom() AND $_timeTo()\r\nORDER BY \"time\" ASC;",
+          "rawSql": "SELECT\r\n  -- Combina data e hora em um único campo de timestamp chamado \"time\"\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded AS \"time\",\r\n  temperature AS \"Temperatura\",\r\n  humidity AS \"Umidade\",\r\n  pressure AS \"Pressão\",\r\n  sensor_id\r\nFROM data\r\nWHERE\r\n  -- Filtra os dados pelo intervalo de tempo selecionado no Grafana\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded BETWEEN $__timeFrom() AND $__timeTo()\r\nORDER BY \"time\" ASC;",
           "refId": "A",
           "sql": {
             "columns": [
