@@ -6,6 +6,7 @@ apiVersion: 1
 datasources:
   - name: 'PostgreSQL Sensores'
     type: postgres
+    uid: 'postgresql-sensores'      # UID fixo para referência nos dashboards
     url: db:5432                    # Endereço do container PostgreSQL
     user: ${POSTGRES_USER}          # Variável do arquivo .env
     database: ${POSTGRES_DB}        # Variável do arquivo .env
