@@ -361,7 +361,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n  COUNT(DISTINCT sensor_id) AS \"Sensores Ativos\"\r\nFROM data\r\nWHERE\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded BETWEEN $___timeFrom() AND $___timeTo();",
+          "rawSql": "SELECT\r\n  COUNT(DISTINCT sensor_id) AS \"Sensores Ativos\"\r\nFROM data\r\nWHERE\r\n  CAST(date_recorded AS TIMESTAMP) + time_recorded BETWEEN $__timeFrom() AND $__timeTo();",
           "refId": "A",
           "sql": {
             "columns": [
